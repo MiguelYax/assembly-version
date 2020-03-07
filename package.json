@@ -16,7 +16,7 @@
     "url": "https://github.com/MiguelYax/assembly-version/issues"
   },
   "homepage": "https://github.com/MiguelYax/assembly-version#readme",
-  "devDependencies": {
+  "dependencies": {
     "gulp": "^4.0.0",
     "gulp-git": "^2.4.1",
     "gulp-util": "^3.0.8",
