@@ -15,6 +15,19 @@ const git = require("gulp-git");
 const util = require("gulp-util");
 const version = require("pa-dss-version");
 
+//    /**
+//     * getParams Provide a easy way to solve git.exec arguments.
+//     * @param {String} cmd  `''` Git command with out 'git' word. 
+//     * @private
+//     */
+//   let getParams = function(cmd) {
+//     return {
+//         args: cmd,
+//         quiet: true,
+//         log: false
+//     }
+// }
+
 
 class Manager {
     tagRegex = /\d+.\d+.\d+.\d+.\d+/g;
@@ -44,11 +57,11 @@ class Manager {
     }
 
     /**
-    * getGitParam Provide a easy way to solve git.exec arguments.
+    * getParams Provide a easy way to solve git.exec arguments.
     * @param {String} cmd  `''` Git command with out 'git' word. 
     * @private
     */
-    getGitParam(cmd) {
+    getParams(cmd) {
         return {
             args: cmd,
             quiet: true,
@@ -111,7 +124,8 @@ class Manager {
      * @private
      */
     changeVersion(mode, tag, cb) {
-        this.parseAssemblyInfo((currentVersion) => {
+        let me = this;
+        me.parseAssemblyInfo((currentVersion) => {
             let newVersion = version.up(currentVersion, mode);
             let tagMode = tag || mode;
             util.log(
@@ -120,29 +134,27 @@ class Manager {
                 " to ",
                 util.colors.green(newVersion)
             );
-            git.exec(
-                this.getGitParam('log -n 1 --format="%h"'),
-                function (err, stdout) {
-                    let checksum = clear(stdout);
-                    this.writeAssemblyInfo(currentVersion, newVersion, (err) => {
+            git.exec(me.getParams('log -n 1 --format="%h"'), (err, stdout) => {
+                let checksum = clear(stdout);
+                this.writeAssemblyInfo(currentVersion, newVersion, (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                    git.exec(me.getParams(`add  ${me.getAssemblyInformationFilePath()}`), (err, stdout, stderr) => {
                         if (err) {
                             throw err;
                         }
-                        git.exec(this.getGitParam(`add  ${this.getAssemblyInformationFilePath()}`), (err, stdout, stderr) => {
+                        git.exec(me.getParams(`commit -m "Change version to: v${newVersion} Mode: ${tagMode}" `), (err, stdout, stderr) => {
                             if (err) {
                                 throw err;
                             }
-                            git.exec(this.getGitParam(`commit -m "Change version to: v${newVersion} Mode: ${tagMode}" `), (err, stdout, stderr) => {
-                                if (err) {
-                                    throw err;
-                                }
-                                createTag(checksum, newVersion, tagMode, cb);
-                            }
-                            );
+                            createTag(checksum, newVersion, tagMode, cb);
                         }
                         );
-                    });
-                }
+                    }
+                    );
+                });
+            }
             );
         });
     }
@@ -158,14 +170,15 @@ class Manager {
      * @private
      */
     createTag(checksum, version, mode, cb) {
+        let me = this;
         let tag = "v" + version;
-        git.exec(this.getGitParam(`tag -a  ${tag} ${checksum} -m "${mode}"`), (err, stdout, stderr) => {
-            git.exec(this.getGitParam("push --tag"), (err, stdout, stderr) => {
+        git.exec(me.getParams(`tag -a  ${tag} ${checksum} -m "${mode}"`), (err, stdout, stderr) => {
+            git.exec(me.getParams("push --tag"), (err, stdout, stderr) => {
                 if (err) {
                     util.log(util.colors.red(err.message));
                     throw err;
                 }
-                git.exec(this.getGitParam("push"), (err, stdout, stderr) => {
+                git.exec(me.getParams("push"), (err, stdout, stderr) => {
                     if (err) {
                         util.log(util.colors.red(err.message));
                         throw err;
@@ -186,12 +199,8 @@ class Manager {
     * @private
     */
 
-    historyTags(cb) {
-        let n = Number.isInteger(argv.n) ? argv.n : 10,
-            s = argv.s || argv.search,
-            search = s ? `-l "*${s}*"` : "";
-
-        git.exec(this.getGitParam(`tag --sort=-taggerdate ${search} --format="%(tag), %(taggername), %(taggerdate), %(subject)" | head -n ${n}`), (error, stdout, stderr) => {
+    historyTags(n, search, cb) {
+        git.exec(this.getParams(`tag --sort=-taggerdate ${search} --format="%(tag), %(taggername), %(taggerdate), %(subject)" | head -n ${n}`), (error, stdout, stderr) => {
             if (error) {
                 util.log(util.colors.red(error.message));
                 return error;
@@ -256,7 +265,12 @@ class Manager {
             this.changeVersion("interface", "development", cb);
         });
 
-        gulpInstance.task("tags", this.historyTags);
+        gulpInstance.task("tags", cb => {
+                n = Number.isInteger(argv.n) ? argv.n : 10,
+                s = argv.s || argv.search,
+                search = s ? `-l "*${s}*"` : "";
+                this.historyTags(n, search, cb);
+        });
     }
 }
 
