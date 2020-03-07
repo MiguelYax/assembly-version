@@ -13,6 +13,8 @@ const argv = require("yargs").argv;
 const fs = require('fs');
 const git = require("gulp-git");
 const util = require("gulp-util");
+const log = require("fancy-log");
+const colors = require("ansi-colors");
 const version = require("pa-dss-version");
 
 class Manager {
@@ -113,11 +115,11 @@ class Manager {
         me.parseAssemblyInfo((currentVersion) => {
             let newVersion = version.up(currentVersion, mode);
             let tagMode = tag || mode;
-            util.log(
+            log(
                 "Change version",
-                util.colors.blue(currentVersion),
+                colors.blue(currentVersion),
                 " to ",
-                util.colors.green(newVersion)
+                colors.green(newVersion)
             );
             git.exec(me.getParams('log -n 1 --format="%h"'), (err, stdout) => {
                 let checksum = clear(stdout);
@@ -160,15 +162,15 @@ class Manager {
         git.exec(me.getParams(`tag -a  ${tag} ${checksum} -m "${mode}"`), (err, stdout, stderr) => {
             git.exec(me.getParams("push --tag"), (err, stdout, stderr) => {
                 if (err) {
-                    util.log(util.colors.red(err.message));
+                    log(colors.red(err.message));
                     throw err;
                 }
                 git.exec(me.getParams("push"), (err, stdout, stderr) => {
                     if (err) {
-                        util.log(util.colors.red(err.message));
+                        log(colors.red(err.message));
                         throw err;
                     }
-                    util.log(util.colors.green("Success..."));
+                    log(colors.green("Success..."));
                     cb();
                 }
                 );
@@ -189,7 +191,7 @@ class Manager {
     showVersionLog(limit = 10, search = '', cb) {
         git.exec(this.getParams(`tag --sort=-taggerdate ${search} --format="%(tag), %(taggername), %(taggerdate), %(subject)" | head -n ${limit}`), (error, stdout, stderr) => {
             if (error) {
-                util.log(util.colors.red(error.message));
+                log(colors.red(error.message));
                 return error;
             }
             let firstList = stdout.split("\n") || [];
@@ -203,16 +205,16 @@ class Manager {
                     if (vTag) {
                         console.log(
                             [
-                                isRelease ? util.colors.green(vTag) : util.colors.magenta(vTag),
-                                util.colors.cyan(vMode),
-                                util.colors.yellow(infoList[1]),
-                                util.colors.blue(infoList[2])
+                                isRelease ? colors.green(vTag) : colors.magenta(vTag),
+                                colors.cyan(vMode),
+                                colors.yellow(infoList[1]),
+                                colors.blue(infoList[2])
                             ].join("\t")
                         );
                     }
                 }
             } else {
-                util.log(util.colors.yellow("No tags to show..."));
+                log(colors.yellow("No tags to show..."));
             }
             cb();
         }
