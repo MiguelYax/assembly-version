@@ -11,24 +11,43 @@
 
 const argv = require("yargs").argv;
 const fs = require('fs');
+const git = require("gulp-git");
+const util = require("gulp-util");
+const version = require("pa-dss-version");
 
 
 class Manager {
     tagRegex = /\d+.\d+.\d+.\d+.\d+/g;
-    AssemblyInfoFilePath = `${__dirname}/Properties/AssemblyInfo.cs`;
     AssemblyInfoContent = "";
 
-    constructor(AssemblyInfoFilePath = "") {
-        if (AssemblyInfoFilePath !== '') {
-            this.AssemblyInfoFilePath = AssemblyInfoFilePath;
+    /**
+     * @param {string} AssemblyInformationFilePath 
+     * @public
+     */
+    setAssemblyInformationFilePath(AssemblyInformationFilePath) {
+        var oldAssemblyInformationFilePath = this.AssemblyInformationFilePath;
+        if (AssemblyInformationFilePath !== oldAssemblyInformationFilePath) {
+
+            this.AssemblyInformationFilePath = AssemblyInformationFilePath;
+            //this.updateProperty(AssemblyInformationFilePath, oldAssemblyInformationFilePath);
         }
     }
 
     /**
-     * getGitParam Provide a easy way to solve git.exec arguments.
-     * @param {String} cmd  `''` Git command with out 'git' word. 
-     * @private
+     * @returns {string} AssemblyInformationFilePath  
+     * @public
      */
+    getAssemblyInformationFilePath(AssemblyInformationFilePath) {
+        var AssemblyInformationFilePath = this.AssemblyInformationFilePath || `${__dirname}/Properties/AssemblyInfo.cs`;
+
+        return AssemblyInformationFilePath;
+    }
+
+    /**
+    * getGitParam Provide a easy way to solve git.exec arguments.
+    * @param {String} cmd  `''` Git command with out 'git' word. 
+    * @private
+    */
     getGitParam(cmd) {
         return {
             args: cmd,
@@ -37,20 +56,21 @@ class Manager {
         }
     }
 
+
     /**
      * parseAssemblyInfo Solve a current version located in  AssemblyInfo.cs file.
      * @param {function} cb  `` Callback function. 
      * @private
      */
     parseAssemblyInfo(cb) {
-        fs.readFile(this.AssemblyInfoFilePath, { encoding: "utf-8" }, (err, data) => {
+        fs.readFile(this.getAssemblyInformationFilePath(), { encoding: "utf-8" }, (err, data) => {
             if (err) {
                 throw err;
             }
-            AssemblyInfoContent = data;
+            this.AssemblyInfoContent = data;
 
-            let AssemblyVersionTag = AssemblyInfoContent.match(/AssemblyVersion\("\d+.\d+.\d+.\d+"\)/g),
-                AssemblyFileVersionTag = AssemblyInfoContent.match(/AssemblyFileVersion\("\d+.\d+.\d+.\d+"\)/g);
+            let AssemblyVersionTag = this.AssemblyInfoContent.match(/AssemblyVersion\("\d+.\d+.\d+.\d+"\)/g),
+                AssemblyFileVersionTag = this.AssemblyInfoContent.match(/AssemblyFileVersion\("\d+.\d+.\d+.\d+"\)/g);
 
             let AssemblyVersion = AssemblyVersionTag[0].match(this.tagRegex),
                 AssemblyFileVersion = AssemblyFileVersionTag[0].match(this.tagRegex);
@@ -71,10 +91,10 @@ class Manager {
             newAssemblyVersion = `AssemblyVersion\("${newVersion}")`,
             newAssemblyFileVersion = `AssemblyFileVersion\("${newVersion}")`;
 
-        let newAssemblyInfoContent = AssemblyInfoContent.replace(oldAssemblyVersion, newAssemblyVersion)
+        let newAssemblyInfoContent = this.AssemblyInfoContent.replace(oldAssemblyVersion, newAssemblyVersion)
             .replace(oldAssemblyFileVersion, newAssemblyFileVersion);
 
-        fs.writeFile(this.AssemblyInfoFilePath, newAssemblyInfoContent, (err) => {
+        fs.writeFile(this.getAssemblyInformationFilePath(), newAssemblyInfoContent, (err) => {
             if (err) {
                 throw err;
             }
@@ -91,8 +111,7 @@ class Manager {
      * @private
      */
     changeVersion(mode, tag, cb) {
-        this.parseAssemblyInfo(function (version) {
-            let currentVersion = version;
+        this.parseAssemblyInfo((currentVersion) => {
             let newVersion = version.up(currentVersion, mode);
             let tagMode = tag || mode;
             util.log(
@@ -109,7 +128,7 @@ class Manager {
                         if (err) {
                             throw err;
                         }
-                        git.exec(this.getGitParam(`add  ${AssemblyInfoFilePath}`), (err, stdout, stderr) => {
+                        git.exec(this.getGitParam(`add  ${this.getAssemblyInformationFilePath()}`), (err, stdout, stderr) => {
                             if (err) {
                                 throw err;
                             }
@@ -162,10 +181,10 @@ class Manager {
     }
 
     /**
-   * writeAssemblyInfo Write a current version located in  AssemblyInfo.cs file.
-   * @param {function} cb  `` Callback function. 
-   * @private
-   */
+    * writeAssemblyInfo Write a current version located in  AssemblyInfo.cs file.
+    * @param {function} cb  `` Callback function. 
+    * @private
+    */
 
     historyTags(cb) {
         let n = Number.isInteger(argv.n) ? argv.n : 10,
@@ -237,9 +256,9 @@ class Manager {
             this.changeVersion("interface", "development", cb);
         });
 
-        gulpInstance.task("tags", historyTags);
+        gulpInstance.task("tags", this.historyTags);
     }
 }
 
-module.exports = Manager;
+module.exports = new Manager();
 
