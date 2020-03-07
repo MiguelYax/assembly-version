@@ -59,7 +59,7 @@ class Version {
   /**
    * decrease tag version
    * @param {Number} tag  `` tag version
-   * @param {String} mode  `` change mode ['major', 'minor', 'secure', 'crud', 'interface']
+   * @param {String} mode  `` change mode ['major', 'minor', 'build', 'revision']
    * @param {Boolean} inc  `false` increase or decrease tag version
    * @private
    */
@@ -85,6 +85,7 @@ class Version {
       case "build":
         {
           this._build += add;
+          this._revision = 0;
         }
         break;
       case "revision":

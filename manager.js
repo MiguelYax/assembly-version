@@ -25,11 +25,8 @@ class Manager {
      * @param {string} AssemblyInformationFilePath 
      * @public
      */
-    setAssemblyInformationFilePath(AssemblyInformationFilePath = '/Properties/AssemblyInfo.cs') {
-        var oldAssemblyInformationFilePath = this.AssemblyInformationFilePath;
-        if (AssemblyInformationFilePath !== oldAssemblyInformationFilePath) {
-            this.AssemblyInformationFilePath = path.join(__dirname, AssemblyInformationFilePath);
-        }
+    setAssemblyInformationFilePath(AssemblyInformationFilePath) {
+        this.AssemblyInformationFilePath = AssemblyInformationFilePath;
     }
 
     /**
@@ -246,21 +243,24 @@ class Manager {
             this.changeVersion("minor", "", cb);
         });
 
+        gulpInstance.task("build", cb => {
+            this.changeVersion("build", "", cb);
+        });
+
+        gulpInstance.task("revision", cb => {
+            this.changeVersion("build", "", cb);
+        });
+
+        gulpInstance.task("production", cb => {
+            this.changeVersion("build", "production", cb);
+        });
+
         gulpInstance.task("patch", cb => {
             this.changeVersion("revision", "", cb);
         });
 
-        gulpInstance.task("secure", cb => {
-            this.changeVersion("secure", "", cb);
-        });
-        gulpInstance.task("production", cb => {
-            this.changeVersion("revision", "production", cb);
-        });
-        gulpInstance.task("development", cb => {
-            this.changeVersion("revision", "development", cb);
-        });
 
-        gulpInstance.task("search", cb => {
+        gulpInstance.task("tags", cb => {
             let n = Number.isInteger(argv.n) ? argv.n : 10,
                 s = argv.s || argv.search,
                 search = s ? `-l "*${s}*"` : "";
