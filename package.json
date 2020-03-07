@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MiguelYax/wcf-version.git"
+    "url": "git+https://github.com/MiguelYax/assembly-version.git"
   },
   "author": "Miguel Yax <mig_dj@hotmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/MiguelYax/wcf-version/issues"
+    "url": "https://github.com/MiguelYax/assembly-version/issues"
   },
-  "homepage": "https://github.com/MiguelYax/wcf-version#readme",
+  "homepage": "https://github.com/MiguelYax/assembly-version#readme",
   "devDependencies": {
     "gulp": "^4.0.0",
     "gulp-git": "^2.4.1",
