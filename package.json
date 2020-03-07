@@ -21,7 +21,6 @@
     "fancy-log": "^1.3.3",
     "gulp": "^4.0.0",
     "gulp-git": "^2.4.1",
-    "pa-dss-version": "^1.0.4",
     "yargs": "^8.0.2"
   }
 }

@@ -12,13 +12,12 @@
 const argv = require("yargs").argv;
 const fs = require('fs');
 const git = require("gulp-git");
-const util = require("gulp-util");
 const log = require("fancy-log");
 const colors = require("ansi-colors");
-const version = require("pa-dss-version");
+const version = require("./version");
 
 class Manager {
-    tagRegex = /\d+.\d+.\d+.\d+.\d+/g;
+    tagRegex = /\d+.\d+.\d+.\d+/g;
     AssemblyInfoContent = "";
 
     /**
@@ -243,21 +242,17 @@ class Manager {
         });
 
         gulpInstance.task("patch", cb => {
-            this.changeVersion("interface", "", cb);
+            this.changeVersion("revision", "", cb);
         });
 
         gulpInstance.task("secure", cb => {
             this.changeVersion("secure", "", cb);
         });
-
-        gulpInstance.task("crud", cb => {
-            this.changeVersion("crud", "", cb);
-        });
         gulpInstance.task("production", cb => {
-            this.changeVersion("interface", "production", cb);
+            this.changeVersion("revision", "production", cb);
         });
         gulpInstance.task("development", cb => {
-            this.changeVersion("interface", "development", cb);
+            this.changeVersion("revision", "development", cb);
         });
 
         gulpInstance.task("search", cb => {
