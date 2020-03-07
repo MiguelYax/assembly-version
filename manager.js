@@ -106,7 +106,7 @@ class Manager {
      * @param {String} mode  `` Mode as de version change.
      * @param {String} tag  `''` Custom label to apply to the version tag. 
      * @param {function} cb  `` Callback function. 
-     * @private
+     * @public
      */
     changeVersion(mode, tag, cb) {
         let me = this;
@@ -152,7 +152,7 @@ class Manager {
      * @param {String} version  `''` Current version. 
      * @param {String} mode  `` Mode as de version change.
      * @param {function} cb  `` Callback function. 
-     * @private
+     * @public
      */
     createTag(checksum, version, mode, cb) {
         let me = this;
@@ -183,7 +183,7 @@ class Manager {
     * @param {int} n  `10` Limit of version log to show. 
     * @param {string} search  `''` Search pather to find in tag list.
     * @param {function} cb  `` Callback function. 
-    * @private
+    * @public
     */
 
     showVersionLog(limit = 10, search = '', cb) {
@@ -218,6 +218,12 @@ class Manager {
         }
         );
     }
+
+    /**
+     * init Set  assembly-version definition task to an isntance of gulp.
+     * @param {Object} gulpInstance  ``  Instace of gulp.
+     * @public
+     */
 
     init(gulpInstance) {
 
@@ -256,7 +262,6 @@ class Manager {
                let n = Number.isInteger(argv.n) ? argv.n : 10,
                 s = argv.s || argv.search,
                 search = s ? `-l "*${s}*"` : "";
-                console.log(n, search)
                 this.showVersionLog(n, search, cb);
         });
     }
