@@ -15,20 +15,6 @@ const git = require("gulp-git");
 const util = require("gulp-util");
 const version = require("pa-dss-version");
 
-//    /**
-//     * getParams Provide a easy way to solve git.exec arguments.
-//     * @param {String} cmd  `''` Git command with out 'git' word. 
-//     * @private
-//     */
-//   let getParams = function(cmd) {
-//     return {
-//         args: cmd,
-//         quiet: true,
-//         log: false
-//     }
-// }
-
-
 class Manager {
     tagRegex = /\d+.\d+.\d+.\d+.\d+/g;
     AssemblyInfoContent = "";
@@ -111,7 +97,6 @@ class Manager {
             if (err) {
                 throw err;
             }
-
             cb();
         });
     }
@@ -148,7 +133,7 @@ class Manager {
                             if (err) {
                                 throw err;
                             }
-                            createTag(checksum, newVersion, tagMode, cb);
+                            me.createTag(checksum, newVersion, tagMode, cb);
                         }
                         );
                     }
@@ -195,12 +180,14 @@ class Manager {
 
     /**
     * writeAssemblyInfo Write a current version located in  AssemblyInfo.cs file.
+    * @param {int} n  `10` Limit of version log to show. 
+    * @param {string} search  `''` Search pather to find in tag list.
     * @param {function} cb  `` Callback function. 
     * @private
     */
 
-    historyTags(n, search, cb) {
-        git.exec(this.getParams(`tag --sort=-taggerdate ${search} --format="%(tag), %(taggername), %(taggerdate), %(subject)" | head -n ${n}`), (error, stdout, stderr) => {
+    showVersionLog(limit = 10, search = '', cb) {
+        git.exec(this.getParams(`tag --sort=-taggerdate ${search} --format="%(tag), %(taggername), %(taggerdate), %(subject)" | head -n ${limit}`), (error, stdout, stderr) => {
             if (error) {
                 util.log(util.colors.red(error.message));
                 return error;
@@ -265,11 +252,12 @@ class Manager {
             this.changeVersion("interface", "development", cb);
         });
 
-        gulpInstance.task("tags", cb => {
-                n = Number.isInteger(argv.n) ? argv.n : 10,
+        gulpInstance.task("search", cb => {
+               let n = Number.isInteger(argv.n) ? argv.n : 10,
                 s = argv.s || argv.search,
                 search = s ? `-l "*${s}*"` : "";
-                this.historyTags(n, search, cb);
+                console.log(n, search)
+                this.showVersionLog(n, search, cb);
         });
     }
 }
