@@ -55,7 +55,15 @@ class Manager {
             log: false
         }
     }
+    /**
+    * clear Remove tabs, breack like, and spaces.
+    * @param {String} text  `''`  
+    * @private
+    */
 
+    clear(text) {
+        return text ? text.replace(/\r?\n|\r/g, "").replace(/[\s]+/, "") : "";
+      }
 
     /**
      * parseAssemblyInfo Solve a current version located in  AssemblyInfo.cs file.
@@ -74,7 +82,7 @@ class Manager {
 
             let AssemblyVersion = AssemblyVersionTag[0].match(this.tagRegex),
                 AssemblyFileVersion = AssemblyFileVersionTag[0].match(this.tagRegex);
-            cb(AssemblyVersion);
+            cb(AssemblyVersion[0]);
         });
     }
 
@@ -121,7 +129,7 @@ class Manager {
                 colors.green(newVersion)
             );
             git.exec(me.getParams('log -n 1 --format="%h"'), (err, stdout) => {
-                let checksum = clear(stdout);
+                let checksum = me.clear(stdout);
                 this.writeAssemblyInfo(currentVersion, newVersion, (err) => {
                     if (err) {
                         throw err;
