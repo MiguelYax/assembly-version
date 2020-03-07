@@ -1,6 +1,6 @@
 {
   "name": "assembly-version",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "manager.js",
   "scripts": {
