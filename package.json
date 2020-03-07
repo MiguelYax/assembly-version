@@ -1,0 +1,26 @@
+{
+  "name": "wcf-version",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MiguelYax/wcf-version.git"
+  },
+  "author": "Miguel Yax <mig_dj@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MiguelYax/wcf-version/issues"
+  },
+  "homepage": "https://github.com/MiguelYax/wcf-version#readme",
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-git": "^2.4.1",
+    "gulp-util": "^3.0.8",
+    "pa-dss-version": "^1.0.4",
+    "yargs": "^8.0.2"
+  }
+}
