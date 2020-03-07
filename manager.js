@@ -15,8 +15,14 @@ const fs = require('fs');
 
 class Manager {
     tagRegex = /\d+.\d+.\d+.\d+.\d+/g;
-    AssemblyInfoFile = `${__dirname}/Properties/AssemblyInfo.cs`;
+    AssemblyInfoFilePath = `${__dirname}/Properties/AssemblyInfo.cs`;
     AssemblyInfoContent = "";
+
+    constructor(AssemblyInfoFilePath = "") {
+        if (AssemblyInfoFilePath !== '') {
+            this.AssemblyInfoFilePath = AssemblyInfoFilePath;
+        }
+    }
 
     /**
      * getGitParam Provide a easy way to solve git.exec arguments.
@@ -37,7 +43,7 @@ class Manager {
      * @private
      */
     parseAssemblyInfo(cb) {
-        fs.readFile(this.AssemblyInfoFile, { encoding: "utf-8" }, (err, data) => {
+        fs.readFile(this.AssemblyInfoFilePath, { encoding: "utf-8" }, (err, data) => {
             if (err) {
                 throw err;
             }
@@ -68,7 +74,7 @@ class Manager {
         let newAssemblyInfoContent = AssemblyInfoContent.replace(oldAssemblyVersion, newAssemblyVersion)
             .replace(oldAssemblyFileVersion, newAssemblyFileVersion);
 
-        fs.writeFile(this.AssemblyInfoFile, newAssemblyInfoContent, (err) => {
+        fs.writeFile(this.AssemblyInfoFilePath, newAssemblyInfoContent, (err) => {
             if (err) {
                 throw err;
             }
@@ -103,7 +109,7 @@ class Manager {
                         if (err) {
                             throw err;
                         }
-                        git.exec(this.getGitParam(`add  ${AssemblyInfoFile}`), (err, stdout, stderr) => {
+                        git.exec(this.getGitParam(`add  ${AssemblyInfoFilePath}`), (err, stdout, stderr) => {
                             if (err) {
                                 throw err;
                             }
@@ -234,4 +240,6 @@ class Manager {
         gulpInstance.task("tags", historyTags);
     }
 }
+
+module.exports = Manager;
 
