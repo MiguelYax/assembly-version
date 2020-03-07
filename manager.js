@@ -15,6 +15,7 @@ const git = require("gulp-git");
 const log = require("fancy-log");
 const colors = require("ansi-colors");
 const version = require("./version");
+const path = require('path')
 
 class Manager {
     tagRegex = /\d+.\d+.\d+.\d+/g;
@@ -24,12 +25,10 @@ class Manager {
      * @param {string} AssemblyInformationFilePath 
      * @public
      */
-    setAssemblyInformationFilePath(AssemblyInformationFilePath) {
+    setAssemblyInformationFilePath(AssemblyInformationFilePath = '/Properties/AssemblyInfo.cs') {
         var oldAssemblyInformationFilePath = this.AssemblyInformationFilePath;
         if (AssemblyInformationFilePath !== oldAssemblyInformationFilePath) {
-
-            this.AssemblyInformationFilePath = AssemblyInformationFilePath;
-            //this.updateProperty(AssemblyInformationFilePath, oldAssemblyInformationFilePath);
+            this.AssemblyInformationFilePath = path.join(__dirname, AssemblyInformationFilePath);
         }
     }
 
@@ -38,9 +37,7 @@ class Manager {
      * @public
      */
     getAssemblyInformationFilePath(AssemblyInformationFilePath) {
-        var AssemblyInformationFilePath = this.AssemblyInformationFilePath || `${__dirname}/Properties/AssemblyInfo.cs`;
-
-        return AssemblyInformationFilePath;
+        return this.AssemblyInformationFilePath;
     }
 
     /**
@@ -63,7 +60,7 @@ class Manager {
 
     clear(text) {
         return text ? text.replace(/\r?\n|\r/g, "").replace(/[\s]+/, "") : "";
-      }
+    }
 
     /**
      * parseAssemblyInfo Solve a current version located in  AssemblyInfo.cs file.
@@ -264,10 +261,10 @@ class Manager {
         });
 
         gulpInstance.task("search", cb => {
-               let n = Number.isInteger(argv.n) ? argv.n : 10,
+            let n = Number.isInteger(argv.n) ? argv.n : 10,
                 s = argv.s || argv.search,
                 search = s ? `-l "*${s}*"` : "";
-                this.showVersionLog(n, search, cb);
+            this.showVersionLog(n, search, cb);
         });
     }
 }
